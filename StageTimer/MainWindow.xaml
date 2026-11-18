@@ -1,0 +1,151 @@
+﻿<Window x:Class="StageTimer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ShaJabil Timer"
+        Width="560" Height="460" MinWidth="460" MinHeight="320"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" Topmost="True" ShowActivated="False"
+        FontFamily="Segoe UI, Microsoft YaHei UI">
+
+    <Border x:Name="RootBorder"
+            Background="#000000" BorderBrush="#262626" BorderThickness="1" CornerRadius="12"
+            MouseLeftButtonDown="Root_MouseLeftButtonDown"
+            MouseMove="Root_MouseMove"
+            MouseLeftButtonUp="Root_MouseLeftButtonUp"
+            LostMouseCapture="Root_LostMouseCapture">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- 标题栏 -->
+            <Border x:Name="HeaderBar" Grid.Row="0" Margin="12,12,12,0" Padding="12,8"
+                    Background="#0D0D0D" BorderBrush="#262626" BorderThickness="1" CornerRadius="10">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button x:Name="PinButton" Style="{StaticResource CircleButton}" Content="&#xE718;"
+                                ToolTip="始终置顶（开 / 关）" Click="Pin_Click" />
+                        <Button Style="{StaticResource CircleButton}" Content="&#xE73F;" Margin="6,0,0,0"
+                                ToolTip="紧凑模式：只显示时间（双击计时区域或 Ctrl+Alt+M 切换）" Click="Compact_Click" />
+                        <Button Style="{StaticResource CircleButton}" Content="&#xE713;" Margin="6,0,0,0"
+                                ToolTip="设置" Click="Settings_Click" />
+                        <Button Style="{StaticResource CircleButton}" Content="&#xE897;" Margin="6,0,0,0"
+                                ToolTip="帮助与快捷键" Click="Help_Click" />
+                        <Button Style="{StaticResource CircleButton}" Content="&#xE921;" Margin="6,0,0,0"
+                                FontSize="10" ToolTip="最小化" Click="Minimize_Click" />
+                        <Button Style="{StaticResource CircleButton}" Content="&#xE8BB;" Margin="6,0,0,0"
+                                FontSize="10" ToolTip="关闭" Click="Close_Click" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Width="36" Height="36" CornerRadius="18" Background="#E62B1E">
+                            <TextBlock Text="&#xE916;" FontFamily="{StaticResource IconFont}" FontSize="18"
+                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Text="ShaJabil Timer" Margin="10,0,0,0" VerticalAlignment="Center"
+                                   FontSize="17" FontWeight="SemiBold" Foreground="White" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- 计时区域：Viewbox 让数字随窗口大小缩放 -->
+            <Viewbox x:Name="TimerArea" Grid.Row="1" Margin="12" Stretch="Uniform">
+                <Grid Width="760">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="48" />
+                        <RowDefinition Height="236" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock x:Name="StatusLabel" Grid.Row="0" Text="超时"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               FontSize="28" FontWeight="SemiBold" Foreground="#FF3B30" Visibility="Hidden" />
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="330" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="330" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- 分钟 -->
+                        <Border x:Name="MinutesPanel" Grid.Column="0" Style="{StaticResource DigitPanel}"
+                                MouseWheel="Minutes_MouseWheel">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Viewbox StretchDirection="DownOnly" Margin="16,0,4,0">
+                                    <TextBlock x:Name="MinutesText" Style="{StaticResource DigitText}" Text="05" />
+                                </Viewbox>
+                                <StackPanel x:Name="MinutesArrows" Grid.Column="1" VerticalAlignment="Center"
+                                            Margin="0,0,16,0">
+                                    <RepeatButton Style="{StaticResource ArrowButton}" Content="&#xE70E;"
+                                                  ToolTip="+1 分钟" Click="MinutesUp_Click" Margin="0,0,0,26" />
+                                    <RepeatButton Style="{StaticResource ArrowButton}" Content="&#xE70D;"
+                                                  ToolTip="-1 分钟" Click="MinutesDown_Click" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- 冒号 -->
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Ellipse x:Name="ColonTop" Width="32" Height="32" Fill="White" Margin="0,0,0,34" />
+                            <Ellipse x:Name="ColonBottom" Width="32" Height="32" Fill="White" />
+                        </StackPanel>
+
+                        <!-- 秒 -->
+                        <Border x:Name="SecondsPanel" Grid.Column="2" Style="{StaticResource DigitPanel}"
+                                MouseWheel="Seconds_MouseWheel">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Viewbox StretchDirection="DownOnly" Margin="16,0,4,0">
+                                    <TextBlock x:Name="SecondsText" Style="{StaticResource DigitText}" Text="00" />
+                                </Viewbox>
+                                <StackPanel x:Name="SecondsArrows" Grid.Column="1" VerticalAlignment="Center"
+                                            Margin="0,0,16,0">
+                                    <RepeatButton Style="{StaticResource ArrowButton}" Content="&#xE70E;"
+                                                  ToolTip="+1 秒" Click="SecondsUp_Click" Margin="0,0,0,26" />
+                                    <RepeatButton Style="{StaticResource ArrowButton}" Content="&#xE70D;"
+                                                  ToolTip="-1 秒" Click="SecondsDown_Click" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Viewbox>
+
+            <!-- 底部控制：主按钮始终居中，重置按钮在右侧 -->
+            <Grid x:Name="ControlBar" Grid.Row="2" HorizontalAlignment="Center" Margin="0,0,0,18">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="64" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="64" />
+                </Grid.ColumnDefinitions>
+                <Button x:Name="StartPauseButton" Grid.Column="1" Style="{StaticResource PrimaryButton}"
+                        Content="&#xE768;" ToolTip="开始 (Ctrl+Alt+S)" Click="StartPause_Click" />
+                <Button x:Name="ResetButton" Grid.Column="2" Style="{StaticResource CircleButton}"
+                        Width="44" Height="44" FontSize="16" HorizontalAlignment="Right"
+                        Content="&#xE72C;" ToolTip="重置 (Ctrl+Alt+R)" Click="Reset_Click" Visibility="Hidden" />
+            </Grid>
+
+            <!-- 右下角缩放手柄 -->
+            <Thumb x:Name="ResizeGrip" Grid.Row="0" Grid.RowSpan="3"
+                   HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                   Width="18" Height="18" Margin="0,0,3,3" Cursor="SizeNWSE"
+                   DragDelta="ResizeGrip_DragDelta" ToolTip="拖动调整大小">
+                <Thumb.Template>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border Background="Transparent">
+                            <Path Data="M 15,5 L 5,15 M 15,10 L 10,15" Stroke="#555555" StrokeThickness="1.5" />
+                        </Border>
+                    </ControlTemplate>
+                </Thumb.Template>
+            </Thumb>
+        </Grid>
+    </Border>
+</Window>

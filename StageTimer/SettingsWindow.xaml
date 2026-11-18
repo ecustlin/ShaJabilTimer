@@ -47,10 +47,13 @@
 
         <TextBlock x:Name="ErrorText" Foreground="#FF6B6B" Margin="0,12,0,0" Visibility="Collapsed" />
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
-            <Button Content="取消" IsCancel="True" Style="{StaticResource DialogButton}" />
-            <Button Content="保存" IsDefault="True" Style="{StaticResource DialogButton}" Background="#22A45D"
-                    Click="Save_Click" />
-        </StackPanel>
+        <DockPanel Margin="0,22,0,0">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="取消" IsCancel="True" Style="{StaticResource DialogButton}" />
+                <Button Content="保存" IsDefault="True" Style="{StaticResource DialogButton}" Background="#22A45D"
+                        Click="Save_Click" />
+            </StackPanel>
+            <TextBlock Text="Design by jabilSHAIT" Foreground="#707070" FontSize="12" VerticalAlignment="Center" />
+        </DockPanel>
     </StackPanel>
 </Window>

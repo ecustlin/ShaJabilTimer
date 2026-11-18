@@ -21,7 +21,7 @@ public partial class MainWindow : Window
     private const int HotkeyToggleVisible = 4;
 
     private const double NormalMinWidth = 460, NormalMinHeight = 320;
-    private const double CompactMinWidth = 160, CompactMinHeight = 70;
+    private const double CompactMinWidth = 220, CompactMinHeight = 90;
 
     private static readonly Brush DigitNormal = Frozen(0xFF, 0xFF, 0xFF);
     private static readonly Brush DigitWarning = Frozen(0xFF, 0xB0, 0x20);
@@ -338,27 +338,22 @@ public partial class MainWindow : Window
         MinutesArrows.Visibility = SecondsArrows.Visibility =
             idle && !_compact ? Visibility.Visible : Visibility.Hidden;
 
-        ResetButton.Visibility = _state is TimerState.Running or TimerState.Paused
-            ? Visibility.Visible
-            : Visibility.Hidden;
+        bool resettable = _state is TimerState.Running or TimerState.Paused;
+        ResetButton.Visibility = resettable ? Visibility.Visible : Visibility.Hidden;
+        // 紧凑模式下重置按钮常驻，未开始时置灰，避免按钮位置跳动。
+        CompactResetButton.IsEnabled = resettable;
 
-        switch (_state)
+        (object content, Brush background, string tip) = _state switch
         {
-            case TimerState.Running:
-                StartPauseButton.Content = "\uE769";
-                StartPauseButton.Background = PauseBackground;
-                StartPauseButton.ToolTip = "暂停 (Ctrl+Alt+S)";
-                break;
-            case TimerState.Finished:
-                StartPauseButton.Content = "\uE72C";
-                StartPauseButton.Background = NeutralBackground;
-                StartPauseButton.ToolTip = "重置 (Ctrl+Alt+R)";
-                break;
-            default:
-                StartPauseButton.Content = "\uE768";
-                StartPauseButton.Background = PlayBackground;
-                StartPauseButton.ToolTip = idle ? "开始 (Ctrl+Alt+S)" : "继续 (Ctrl+Alt+S)";
-                break;
+            TimerState.Running => ((object)"\uE769", PauseBackground, "暂停 (Ctrl+Alt+S)"),
+            TimerState.Finished => ("\uE72C", NeutralBackground, "重置 (Ctrl+Alt+R)"),
+            _ => ("\uE768", PlayBackground, idle ? "开始 (Ctrl+Alt+S)" : "继续 (Ctrl+Alt+S)"),
+        };
+        foreach (var button in new[] { StartPauseButton, CompactStartPauseButton })
+        {
+            button.Content = content;
+            button.Background = background;
+            button.ToolTip = tip;
         }
     }
 
@@ -372,10 +367,11 @@ public partial class MainWindow : Window
             _normalBounds = new Rect(Left, Top, Width, Height);
             HeaderBar.Visibility = Visibility.Collapsed;
             ControlBar.Visibility = Visibility.Collapsed;
+            CompactControls.Visibility = Visibility.Visible;
             TimerArea.Margin = new Thickness(8);
             MinWidth = CompactMinWidth;
             MinHeight = CompactMinHeight;
-            Width = Math.Max(_settings.CompactWidth ?? 340, CompactMinWidth);
+            Width = Math.Max(_settings.CompactWidth ?? 420, CompactMinWidth);
             Height = Math.Max(_settings.CompactHeight ?? 150, CompactMinHeight);
         }
         else
@@ -384,6 +380,7 @@ public partial class MainWindow : Window
             _settings.CompactHeight = Height;
             HeaderBar.Visibility = Visibility.Visible;
             ControlBar.Visibility = Visibility.Visible;
+            CompactControls.Visibility = Visibility.Collapsed;
             TimerArea.Margin = new Thickness(12);
             MinWidth = NormalMinWidth;
             MinHeight = NormalMinHeight;
